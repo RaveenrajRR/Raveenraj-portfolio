@@ -15,7 +15,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://raveenraj-portfolio-17ie.vercel.app',
+  'https://raveenraj-portfolio-17ie.vercel.app'
+   ,'https://raveenraj-portfolio-17ie-1zsttkful-raveenrajrrs-projects.vercel.app',
   ...(process.env.CLIENT_ORIGIN || '')
     .split(',')
     .map(origin => origin.trim().replace(/\/$/, ''))
