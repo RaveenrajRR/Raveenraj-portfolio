@@ -6,39 +6,74 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const DATA = path.join(__dirname, 'data.json');
 const MESSAGES = path.join(__dirname, 'messages.json');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = new Set([
+// ==================================================
+// CORS CONFIGURATION
+// ==================================================
+
+const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://raveenraj-portfolio-17ie.vercel.app'
-   ,'https://raveenraj-portfolio-17ie-1zsttkful-raveenrajrrs-projects.vercel.app',
+  'https://raveenraj-portfolio-17ie.vercel.app',
   ...(process.env.CLIENT_ORIGIN || '')
     .split(',')
     .map(origin => origin.trim().replace(/\/$/, ''))
     .filter(Boolean)
-]);
+];
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+
+  const normalizedOrigin = origin.replace(/\/$/, '');
+
+  if (allowedOrigins.includes(normalizedOrigin)) {
+    return true;
+  }
+
+  // Allow this portfolio's Vercel preview deployments.
+  return /^https:\/\/raveenraj-portfolio-17ie(?:-[a-z0-9-]+)?\.vercel\.app$/.test(
+    normalizedOrigin
+  );
+}
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.has(origin.replace(/\/$/, ''))) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
-    return callback(null, false);
+
+    return callback(new Error('Origin not allowed by CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 204
 }));
 
 app.use(express.json({ limit: '1mb' }));
 
+// ==================================================
+// HELPERS
+// ==================================================
+
 const makeId = () =>
   `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 9)}`;
+
+function cleanText(value, max = 3000) {
+  return typeof value === 'string'
+    ? value.trim().slice(0, max)
+    : '';
+}
+
+function serverError(res, message, error) {
+  console.error(message, error);
+  return res.status(500).json({ error: message });
+}
 
 async function readData() {
   const raw = await fs.readFile(DATA, 'utf8');
@@ -53,27 +88,50 @@ async function readData() {
 }
 
 async function writeData(data) {
-  await fs.writeFile(DATA, JSON.stringify(data, null, 2), 'utf8');
+  await fs.writeFile(
+    DATA,
+    JSON.stringify(data, null, 2),
+    'utf8'
+  );
 }
 
-function serverError(res, message, error) {
-  console.error(message, error);
-  return res.status(500).json({ error: message });
+async function readMessages() {
+  try {
+    const raw = await fs.readFile(MESSAGES, 'utf8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
 }
 
-function cleanText(value, max = 3000) {
-  return typeof value === 'string' ? value.trim().slice(0, max) : '';
+async function writeMessages(messages) {
+  await fs.writeFile(
+    MESSAGES,
+    JSON.stringify(messages, null, 2),
+    'utf8'
+  );
 }
 
-// Health check
+// ==================================================
+// HEALTH CHECK
+// ==================================================
+
 app.get('/api/health', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+
   res.json({
     ok: true,
-    service: 'Raveenraj Portfolio API'
+    service: 'Raveenraj Portfolio API',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Full portfolio
+// ==================================================
+// GET FULL PORTFOLIO
+// ==================================================
+
 app.get('/api/portfolio', async (_req, res) => {
   try {
     res.set('Cache-Control', 'no-store');
@@ -83,7 +141,10 @@ app.get('/api/portfolio', async (_req, res) => {
   }
 });
 
-// Skills
+// ==================================================
+// SKILLS
+// ==================================================
+
 app.get('/api/skills', async (req, res) => {
   try {
     const data = await readData();
@@ -111,7 +172,10 @@ app.get('/api/skills', async (req, res) => {
   }
 });
 
-// Projects
+// ==================================================
+// PROJECTS
+// ==================================================
+
 app.get('/api/projects', async (req, res) => {
   try {
     const data = await readData();
@@ -146,7 +210,10 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// Contact form
+// ==================================================
+// CONTACT FORM
+// ==================================================
+
 app.post('/api/contact', async (req, res) => {
   const name = cleanText(req.body?.name, 100);
   const email = cleanText(req.body?.email, 200);
@@ -165,17 +232,7 @@ app.post('/api/contact', async (req, res) => {
   }
 
   try {
-    let messages = [];
-
-    try {
-      const raw = await fs.readFile(MESSAGES, 'utf8');
-      const parsed = JSON.parse(raw);
-      messages = Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) {
-        throw error;
-      }
-    }
+    const messages = await readMessages();
 
     messages.push({
       id: makeId(),
@@ -185,11 +242,7 @@ app.post('/api/contact', async (req, res) => {
       createdAt: new Date().toISOString()
     });
 
-    await fs.writeFile(
-      MESSAGES,
-      JSON.stringify(messages, null, 2),
-      'utf8'
-    );
+    await writeMessages(messages);
 
     return res.status(201).json({
       ok: true,
@@ -200,11 +253,18 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// Admin profile
+// ==================================================
+// ADMIN: UPDATE PROFILE
+// ==================================================
+
 app.put('/api/admin/profile', async (req, res) => {
   try {
     const data = await readData();
-    data.profile = { ...data.profile, ...(req.body || {}) };
+
+    data.profile = {
+      ...data.profile,
+      ...(req.body || {})
+    };
 
     await writeData(data);
     res.json(data.profile);
@@ -213,11 +273,18 @@ app.put('/api/admin/profile', async (req, res) => {
   }
 });
 
-// Add skill
+// ==================================================
+// ADMIN: ADD SKILL
+// ==================================================
+
 app.post('/api/admin/skills', async (req, res) => {
   try {
     const data = await readData();
-    const item = { id: makeId(), ...(req.body || {}) };
+
+    const item = {
+      ...(req.body || {}),
+      id: makeId()
+    };
 
     item.name = cleanText(item.name, 150);
     item.category = cleanText(item.category, 100);
@@ -237,16 +304,22 @@ app.post('/api/admin/skills', async (req, res) => {
   }
 });
 
-// Update skill
+// ==================================================
+// ADMIN: UPDATE SKILL
+// ==================================================
+
 app.put('/api/admin/skills/:id', async (req, res) => {
   try {
     const data = await readData();
+
     const index = data.skills.findIndex(
       item => item.id === req.params.id
     );
 
     if (index < 0) {
-      return res.status(404).json({ error: 'Skill not found.' });
+      return res.status(404).json({
+        error: 'Skill not found.'
+      });
     }
 
     data.skills[index] = {
@@ -262,7 +335,10 @@ app.put('/api/admin/skills/:id', async (req, res) => {
   }
 });
 
-// Delete skill
+// ==================================================
+// ADMIN: DELETE SKILL
+// ==================================================
+
 app.delete('/api/admin/skills/:id', async (req, res) => {
   try {
     const data = await readData();
@@ -278,7 +354,10 @@ app.delete('/api/admin/skills/:id', async (req, res) => {
   }
 });
 
-// Add project
+// ==================================================
+// ADMIN: ADD PROJECT
+// ==================================================
+
 app.post('/api/admin/projects', async (req, res) => {
   try {
     const data = await readData();
@@ -307,16 +386,22 @@ app.post('/api/admin/projects', async (req, res) => {
   }
 });
 
-// Update project
+// ==================================================
+// ADMIN: UPDATE PROJECT
+// ==================================================
+
 app.put('/api/admin/projects/:id', async (req, res) => {
   try {
     const data = await readData();
+
     const index = data.projects.findIndex(
       item => item.id === req.params.id
     );
 
     if (index < 0) {
-      return res.status(404).json({ error: 'Project not found.' });
+      return res.status(404).json({
+        error: 'Project not found.'
+      });
     }
 
     const existing = data.projects[index];
@@ -337,7 +422,10 @@ app.put('/api/admin/projects/:id', async (req, res) => {
   }
 });
 
-// Delete project
+// ==================================================
+// ADMIN: DELETE PROJECT
+// ==================================================
+
 app.delete('/api/admin/projects/:id', async (req, res) => {
   try {
     const data = await readData();
@@ -353,11 +441,39 @@ app.delete('/api/admin/projects/:id', async (req, res) => {
   }
 });
 
-// Unknown API route
+// ==================================================
+// UNKNOWN API ROUTE
+// ==================================================
+
 app.use('/api', (_req, res) => {
-  res.status(404).json({ error: 'API route not found.' });
+  res.status(404).json({
+    error: 'API route not found.'
+  });
 });
+
+// ==================================================
+// ERROR HANDLER
+// ==================================================
+
+app.use((error, _req, res, _next) => {
+  console.error('Request error:', error.message);
+
+  if (error.message === 'Origin not allowed by CORS') {
+    return res.status(403).json({
+      error: 'This website origin is not allowed.'
+    });
+  }
+
+  return res.status(500).json({
+    error: 'Internal server error.'
+  });
+});
+
+// ==================================================
+// START SERVER
+// ==================================================
 
 app.listen(PORT, () => {
   console.log(`Portfolio API running on port ${PORT}`);
 });
+
