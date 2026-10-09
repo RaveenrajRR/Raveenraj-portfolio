@@ -1,0 +1,206 @@
+{
+  "profile": {
+    "name": "Raveenraj RR",
+    "role": "IT Student · Aspiring Full-Stack Developer",
+    "location": "Tamil Nadu, India",
+    "tagline": "I turn ideas into useful digital experiences.",
+    "about": "I'm an IT student learning software development by building practical web, mobile and AI-powered projects. I enjoy exploring full-stack development, solving problems, and creating clean user experiences.",
+    "email": "hello@example.com",
+    "github": "https://github.com/RaveenrajRR",
+    "linkedin": "https://www.linkedin.com/",
+    "availability": "Open to internships & freelance opportunities"
+  },
+  "skills": [
+    {
+      "id": "s1",
+      "name": "HTML5",
+      "category": "Frontend",
+      "level": "Learning",
+      "description": "Semantic page structure"
+    },
+    {
+      "id": "s2",
+      "name": "CSS3",
+      "category": "Frontend",
+      "level": "Learning",
+      "description": "Responsive layouts and styling"
+    },
+    {
+      "id": "s3",
+      "name": "JavaScript",
+      "category": "Language",
+      "level": "Learning",
+      "description": "Web interactions and application logic"
+    },
+    {
+      "id": "s4",
+      "name": "React",
+      "category": "Frontend",
+      "level": "Learning",
+      "description": "Component-based user interfaces"
+    },
+    {
+      "id": "s5",
+      "name": "Node.js",
+      "category": "Backend",
+      "level": "Learning",
+      "description": "JavaScript runtime for APIs"
+    },
+    {
+      "id": "s6",
+      "name": "Express.js",
+      "category": "Backend",
+      "level": "Learning",
+      "description": "REST API development"
+    },
+    {
+      "id": "s7",
+      "name": "MongoDB",
+      "category": "Database",
+      "level": "Learning",
+      "description": "Document database fundamentals"
+    },
+    {
+      "id": "s8",
+      "name": "SQL",
+      "category": "Database",
+      "level": "Learning",
+      "description": "Queries and database normalization"
+    },
+    {
+      "id": "s9",
+      "name": "Flutter / Dart",
+      "category": "Mobile",
+      "level": "Exploring",
+      "description": "Cross-platform mobile app development"
+    },
+    {
+      "id": "s10",
+      "name": "Python",
+      "category": "Language",
+      "level": "Learning",
+      "description": "Scripting and programming fundamentals"
+    },
+    {
+      "id": "s11",
+      "name": "Git & GitHub",
+      "category": "Tools",
+      "level": "Learning",
+      "description": "Version control and collaboration"
+    },
+    {
+      "id": "s12",
+      "name": "REST APIs",
+      "category": "Backend",
+      "level": "Learning",
+      "description": "Connecting frontend and backend"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "name": "CampusPulse 2.0",
+      "type": "Web",
+      "level": "Advanced",
+      "scope": "Full Stack",
+      "status": "In Progress",
+      "description": "A college events platform concept for discovering events, registration, tickets and organizer insights.",
+      "stack": [
+        "React",
+        "Node.js",
+        "Express",
+        "MongoDB"
+      ],
+      "github": "https://github.com/RaveenrajRR",
+      "demo": "#",
+      "icon": "◈"
+    },
+    {
+      "id": "p2",
+      "name": "OpenForge",
+      "type": "Web",
+      "level": "Advanced",
+      "scope": "Full Stack",
+      "status": "In Progress",
+      "description": "An innovation platform concept for challenges, teams, ideas and project collaboration.",
+      "stack": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "github": "https://github.com/RaveenrajRR",
+      "demo": "#",
+      "icon": "✳"
+    },
+    {
+      "id": "p3",
+      "name": "Friends Are Fake Quiz",
+      "type": "Web",
+      "level": "Intermediate",
+      "scope": "Full Stack",
+      "status": "Building",
+      "description": "A shareable friends quiz experience with question selection and result views.",
+      "stack": [
+        "React",
+        "Express",
+        "MongoDB"
+      ],
+      "github": "https://github.com/RaveenrajRR/friends-fake-quiz",
+      "demo": "https://friends-fake-quiz.vercel.app/",
+      "icon": "✦"
+    },
+    {
+      "id": "p4",
+      "name": "Real-time Chat App",
+      "type": "Web",
+      "level": "Advanced",
+      "scope": "Full Stack",
+      "status": "Building",
+      "description": "A chat app project exploring realtime messaging and a separate frontend/backend architecture.",
+      "stack": [
+        "React",
+        "Node.js",
+        "Socket.IO",
+        "MongoDB"
+      ],
+      "github": "https://github.com/RaveenrajRR/realtime-chat-backend",
+      "demo": "https://realtime-chat-frontend-two.vercel.app/",
+      "icon": "⌘"
+    },
+    {
+      "id": "p5",
+      "name": "College Bus Tracking",
+      "type": "Mobile",
+      "level": "Advanced",
+      "scope": "Full Stack",
+      "status": "Concept / Development",
+      "description": "A student, driver and admin system concept with live location tracking and role-based access.",
+      "stack": [
+        "Flutter",
+        "Node.js",
+        "Socket.IO",
+        "MongoDB"
+      ],
+      "github": "https://github.com/RaveenrajRR",
+      "demo": "#",
+      "icon": "⌖"
+    },
+    {
+      "id": "p6",
+      "name": "3D Developer Portfolio",
+      "type": "Web",
+      "level": "Intermediate",
+      "scope": "Frontend",
+      "status": "Building",
+      "description": "A responsive portfolio with 3D visuals, skill filters, project filters and an API-backed contact form.",
+      "stack": [
+        "React",
+        "Three.js",
+        "Express"
+      ],
+      "github": "https://github.com/RaveenrajRR",
+      "demo": "#",
+      "icon": "✧"
+    }
+  ]
+}
